@@ -36,7 +36,6 @@ const findBidsByProject = async (projectId) => {
         select: {
           id: true,
           name: true,
-          email: true,
         },
       },
     },
@@ -44,27 +43,28 @@ const findBidsByProject = async (projectId) => {
   });
 };
 
-const assignBidTransaction = async ({ projectId, selectedBidId, contractorId, allBidIds }) => {
-  return await prisma.$transaction(async (tx) => {
-    const updatedProject = await tx.project.update({
-      where: { id: projectId },
-      data: {
-        status: 'ACTIVE',
-        contractorId,
-        selectedBidId,
-      },
-    });
+const assignBidTransaction = async ({ projectId, selectedBidId, contractorId, newBudget, allBidIds }) => {
+    return await prisma.$transaction(async (tx) => {
 
-    await tx.bid.updateMany({
-      where: { id: { in: allBidIds } },
-      data: {
-        status: allBidIds.includes(selectedBidId) ? 'ACCEPTED' : 'REJECTED',
-      },
+        const updatedProject = await tx.project.update({
+        where: { id: projectId },
+        data: {
+          status: 'ACTIVE',
+          contractorId,
+          selectedBidId,
+          acceptedAmount: newBudget, 
+        },
+      });
+  
+      await tx.bid.updateMany({
+        where: { id: { in: allBidIds } },
+        data: {
+          status: allBidIds.includes(selectedBidId) ? 'ACCEPTED' : 'REJECTED',
+        },
+      });
+      return updatedProject;
     });
-
-    return updatedProject;
-  });
-};
+  };
 
 module.exports = {
   createBid,

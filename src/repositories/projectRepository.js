@@ -1,16 +1,20 @@
 const { PrismaClient } = require('@prisma/client');
 const prisma = new PrismaClient();
+const {cleanProjectResponse} = require('../utils/projectResponseCleaner');
 
 const createProject = async (projectData) => {
-    return await prisma.project.create({
+    const project = await prisma.project.create({
         data: projectData,
     });
+    return cleanProjectResponse(project);
+
 };
 
 const findProjectById = async (id) => {
-    return await prisma.project.findUnique({
+    const project =  await prisma.project.findUnique({
         where: { id },
     });
+    return project ? cleanProjectResponse(project) : null;
 };
 
 const findProjectByOwnerId = async(ownerId) => {
@@ -19,17 +23,37 @@ const findProjectByOwnerId = async(ownerId) => {
     });
 }
 
+const updateProject = async ({ id, ...updateData }) => {
+    const project = await prisma.project.update({
+      where: { id },
+      data: updateData,
+    });
+
+    return cleanProjectResponse(project);
+  };
+
 const updateProjectStatus = async (projectId, status) => {
-    return await prisma.project.update({
+    const project = await prisma.project.update({
         where: { id: projectId },
         data: { status },
     });
+    return cleanProjectResponse(project);
 }
+
+const findProjectsByContractorId = async (contractorId) => {
+    return await prisma.project.findMany({
+      where: { contractorId },
+      orderBy: { createdAt: 'desc' },
+    });
+  };
+  
 
 
 module.exports ={
     createProject,
     findProjectById,
     findProjectByOwnerId,
+    updateProject,
     updateProjectStatus,
+    findProjectsByContractorId
 }

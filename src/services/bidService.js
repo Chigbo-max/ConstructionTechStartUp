@@ -1,4 +1,3 @@
-// src/services/bidService.js
 const bidRepository = require('../repositories/bidRepository');
 const projectRepository = require('../repositories/projectRepository');
 const notificationService = require('../services/notificationService');
@@ -66,48 +65,49 @@ const createBid = async ({
 };
 
 const assignBid = async ({ projectId, bidId, ownerId }) => {
-  const project = await projectRepository.findProjectById(projectId);
-  if (!project) {
-    const err = new Error('Project not found');
-    err.status = 404;
-    throw err;
-  }
-
-  if (project.ownerId !== ownerId) {
-    const err = new Error('Not authorized to assign bids');
-    err.status = 403;
-    throw err;
-  }
-
-  if (project.status !== 'OPEN_FOR_BIDS') {
-    const err = new Error('Project is not in bidding phase');
-    err.status = 400;
-    throw err;
-  }
-
-  const bid = await bidRepository.findBidById(bidId);
-  if (!bid || bid.projectId !== projectId) {
-    const err = new Error('Bid not found');
-    err.status = 404;
-    throw err;
-  }
-
-  const allBids = await bidRepository.findBidsByProject(projectId);
-
-  const result = await bidRepository.assignBidTransaction({
-    projectId,
-    selectedBidId: bidId,
-    contractorId: bid.contractorId,
-    allBidIds: allBids.map(b => b.id),
-  });
-
-  await notificationService.notifyBidAssignment({
-    projectId,
-    acceptedBidId: bidId,
-    rejectedBidIds: allBids.filter(b => b.id !== bidId).map(b => b.id),
-  });
-
-  return result;
-};
+    const project = await projectRepository.findProjectById(projectId);
+    if (!project) {
+      const err = new Error('Project not found');
+      err.status = 404;
+      throw err;
+    }
+  
+    if (project.ownerId !== ownerId) {
+      const err = new Error('Not authorized to assign bids');
+      err.status = 403;
+      throw err;
+    }
+  
+    if (project.status !== 'OPEN_FOR_BIDS') {
+      const err = new Error('Project is not in bidding phase');
+      err.status = 400;
+      throw err;
+    }
+  
+    const bid = await bidRepository.findBidById(bidId);
+    if (!bid || bid.projectId !== projectId) {
+      const err = new Error('Bid not found');
+      err.status = 404;
+      throw err;
+    }
+  
+    const allBids = await bidRepository.findBidsByProject(projectId);
+  
+    const result = await bidRepository.assignBidTransaction({
+      projectId,
+      selectedBidId: bidId,
+      contractorId: bid.contractorId,
+      newBudget: bid.amount, 
+      allBidIds: allBids.map(b => b.id),
+    });
+  
+    await notificationService.notifyBidAssignment({
+      projectId,
+      acceptedBidId: bidId,
+      rejectedBidIds: allBids.filter(b => b.id !== bidId).map(b => b.id),
+    });
+  
+    return result;
+  };
 
 module.exports = { createBid, assignBid };

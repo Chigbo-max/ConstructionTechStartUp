@@ -1,5 +1,6 @@
 const userService = require('../services/userService');
 const projectRepository = require('../repositories/projectRepository')
+const {cleanProjectResponse} = require('../utils/projectResponseCleaner')
 
 
 exports.getProfile =  async (req, res) => {
@@ -13,7 +14,7 @@ exports.getProfile =  async (req, res) => {
             id: user.id,
             email: user.email,
             name: user.name,
-            role: user.role,
+            roles: user.roles,
             professionDescription: user.professionDescription,
             createdAt: user.createdAt
         };
@@ -49,7 +50,11 @@ exports.getUserProjects = async(req, res) => {
             return res.status(403).json({ message: 'Access denied'});
         }
 
-        res.json({ projects });
+        const cleanProjects = projects.map( project => {
+
+        return cleanProjectResponse(project);
+        });
+        res.json({projects: cleanProjects});
     } catch (error) {
         res.status(500).json({ message: 'Failed to get projects'});
     }

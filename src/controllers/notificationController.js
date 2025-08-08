@@ -2,6 +2,7 @@ const notificationService = require('../services/notificationService');
 
 exports.getNotifications = async (req, res) => {
   try {
+
     const { limit, offset, unreadOnly } = req.query;
     const notifications = await notificationService.getUserNotifications(req.user.sub, {
       limit: parseInt(limit) || 20,
@@ -33,3 +34,4 @@ exports.markAllAsRead = async (req, res) => {
     res.status(500).json({ message: error.message });
   }
 };
+

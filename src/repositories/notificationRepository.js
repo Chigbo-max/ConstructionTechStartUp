@@ -2,8 +2,16 @@ const { PrismaClient } = require('@prisma/client');
 const prisma = new PrismaClient();
 
 const createNotification = async (notificationData) => {
+
+    const cleanData = {};
+    Object.keys(notificationData).forEach(key => {
+        if(notificationData[key] !== undefined){
+            cleanData[key] = notificationData[key];
+        }
+    });
+
   return await prisma.notification.create({
-    data: notificationData,
+    data: cleanData,
   });
 };
 

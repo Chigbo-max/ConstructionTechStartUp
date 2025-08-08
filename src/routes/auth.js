@@ -2,6 +2,8 @@ const express = require('express');
 const bcrypt = require('bcrypt');
 const jwt = require('jsonwebtoken');
 const userService =  require('../services/userService');
+const { authenticateToken } = require('../middleware/auth');
+
 
 const router =  express.Router();
 
@@ -13,10 +15,11 @@ router.post('/register', async (req, res) => {
             {
                 sub: user.id,
                 email: user.email,
-                role: user.role
+                role: user.roles[0],
+                allRoles: user.roles
             },
             process.env.JWT_SECRET,
-            {expiredIn: '24h'}
+            {expiresIn: '24h'}
         );
 
         res.status(201).json({
@@ -53,7 +56,8 @@ router.post('/login', async (req, res) => {
         { 
           sub: user.id, 
           email: user.email, 
-          role: user.role 
+          role: user.roles[0],
+          allRoles: user.roles
         },
         process.env.JWT_SECRET,
         { expiresIn: '24h' }
@@ -65,12 +69,41 @@ router.post('/login', async (req, res) => {
           id: user.id, 
           email: user.email, 
           name: user.name, 
-          role: user.role 
+          roles: user.roles
         },
         token 
       });
     } catch (error) {
       res.status(500).json({ message: 'Login failed' });
+    }
+  });
+
+router.post('/switch-role', authenticateToken, async (req, res) => {
+    try {
+      const { role } = req.body;
+      
+      if (!req.user.allRoles.includes(role)) {
+        return res.status(403).json({ message: 'Role not available for this user' });
+      }
+  
+      const token = jwt.sign(
+        { 
+          sub: req.user.sub, 
+          email: req.user.email, 
+          role: role,
+          allRoles: req.user.allRoles
+        },
+        process.env.JWT_SECRET,
+        { expiresIn: '24h' }
+      );
+  
+      res.json({ 
+        message: 'Role switched successfully',
+        currentRole: role,
+        token 
+      });
+    } catch (error) {
+      res.status(500).json({ message: 'Role switch failed' });
     }
   });
 

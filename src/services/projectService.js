@@ -1,27 +1,6 @@
 const projectRepository = require('../repositories/projectRepository');
 const userRepository = require('../repositories/userRepository');
 
-async function geocodeAddress(address) {
-  const url = new URL('https://nominatim.openstreetmap.org/search');
-  url.searchParams.set('q', address);
-  url.searchParams.set('format', 'json');
-  url.searchParams.set('limit', '1');
-  const response = await fetch(url, {
-    headers: { 'User-Agent': 'construction-tech-start-up/1.0' },
-  });
-  if (!response.ok) {
-    throw new Error('Geocoding failed');
-  }
-  const results = await response.json();
-  if (!Array.isArray(results) || results.length === 0) {
-    throw new Error('Address not found');
-  }
-  return {
-    latitude: parseFloat(results[0].lat),
-    longitude: parseFloat(results[0].lon),
-  };
-}
-
 const createProject = async ({
   ownerId,
   title,
@@ -30,10 +9,7 @@ const createProject = async ({
   startDate,
   endDate,
   address,
-  latitude,
-  longitude,
 }) => {
-
   if (
     !title || !description || budget == null ||
     !startDate || !endDate || !address
@@ -47,7 +23,7 @@ const createProject = async ({
     err.status = 404;
     throw err;
   }
-  if (owner.role !== 'HOMEOWNER') {
+  if (!owner.roles.includes('HOMEOWNER')) {
     const err = new Error('Only homeowners can create projects');
     err.status = 403;
     throw err;
@@ -58,14 +34,10 @@ const createProject = async ({
     throw new Error('Budget must be a positive number');
   }
 
-  let latNum = latitude != null ? Number(latitude) : null;
-  let lngNum = longitude != null ? Number(longitude) : null;
-  if (latNum == null || lngNum == null) {
-    const coords = await geocodeAddress(address);
-    latNum = coords.latitude;
-    lngNum = coords.longitude;
+  const trimmedAddress = address.trim();
+  if (trimmedAddress.length < 10) {
+    throw new Error('Address must be at least 10 characters long');
   }
- 
 
   const start = new Date(startDate);
   const end = new Date(endDate);
@@ -83,48 +55,43 @@ const createProject = async ({
     budget: numericBudget,
     startDate: start,
     endDate: end,
-    address,
-    latitude: latNum,
-    longitude: lngNum,
+    address: trimmedAddress,
   };
 
   const project = await projectRepository.createProject(projectData);
   return project;
 };
 
-
-
 const publishProject = async ({ projectId, bidsCloseAt, ownerId }) => {
-    const project = await projectRepository.findProjectById(projectId);
-    if (!project) {
-      const err = new Error('Project not found');
-      err.status = 404;
-      throw err;
-    }
-    if (project.ownerId !== ownerId) {
-      const err = new Error('Not authorized to publish this project');
-      err.status = 403;
-      throw err;
-    }
-    if (project.status !== 'DRAFT') {
-      const err = new Error('Only draft projects can be published');
-      err.status = 400;
-      throw err;
-    }
-  
-    const closeDate = new Date(bidsCloseAt);
-    if (Number.isNaN(closeDate.getTime()) || closeDate <= new Date()) {
-      throw new Error('Bids close date must be in the future');
-    }
-  
-    const updated = await projectRepository.updateProject({
-      id: projectId,
-      status: 'OPEN_FOR_BIDS',
-      bidsCloseAt: closeDate,
-    });
-    return updated;
-  };
+  const project = await projectRepository.findProjectById(projectId);
+  if (!project) {
+    const err = new Error('Project not found');
+    err.status = 404;
+    throw err;
+  }
+  if (project.ownerId !== ownerId) {
+    const err = new Error('Not authorized to publish this project');
+    err.status = 403;
+    throw err;
+  }
+  if (project.status !== 'DRAFT') {
+    const err = new Error('Only draft projects can be published');
+    err.status = 400;
+    throw err;
+  }
 
+  const closeDate = new Date(bidsCloseAt);
+  if (Number.isNaN(closeDate.getTime()) || closeDate <= new Date()) {
+    throw new Error('Bids close date must be in the future');
+  }
+
+  const updated = await projectRepository.updateProject({
+    id: projectId,
+    status: 'OPEN_FOR_BIDS',
+    bidsCloseAt: closeDate,
+  });
+  return updated;
+};
 
 const allowedTransitions = {
   DRAFT: new Set(['PUBLISHED', 'OPEN_FOR_BIDS', 'CANCELLED']),
@@ -134,7 +101,6 @@ const allowedTransitions = {
   COMPLETED: new Set([]),
   CANCELLED: new Set([]),
 };
-
 
 const updateProjectStatus = async ({ projectId, newStatus, actorUserId }) => {
   if (!projectId || !newStatus || !actorUserId) {
@@ -163,7 +129,7 @@ const updateProjectStatus = async ({ projectId, newStatus, actorUserId }) => {
 };
 
 module.exports = {
-     createProject,
-     updateProjectStatus,
-     publishProject
-     };
+  createProject,
+  updateProjectStatus,
+  publishProject
+};

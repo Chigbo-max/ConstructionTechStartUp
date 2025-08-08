@@ -19,9 +19,26 @@ const findUserById = async (id) => {
     });
 }
 
+const updateUserRoles = async (userId, roles) => {
+    return await prisma.user.update({
+      where: { id: userId },
+      data: { roles },
+    });
+  };
+
+  const updateUser = async (userId, updateData) => {
+    return await prisma.user.update({
+        where: { id: userId },
+        data: updateData,
+    });
+};
+
+
 
 module.exports ={
     createUser,
     findUserByEmail,
     findUserById,
+    updateUserRoles,
+    updateUser,
 }

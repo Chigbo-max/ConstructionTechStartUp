@@ -1,4 +1,3 @@
-// src/services/notificationService.js
 const notificationRepository = require('../repositories/notificationRepository');
 
 const notifyBidAssignment = async ({ projectId, acceptedBidId, rejectedBidIds }) => {
@@ -102,6 +101,9 @@ const markAllNotificationsAsRead = async (userId) => {
     throw new Error('Failed to mark all notifications as read');
   }
 };
+
+
+
 
 module.exports = {
   notifyBidAssignment,

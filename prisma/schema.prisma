@@ -48,7 +48,7 @@ model User {
   name         String
   email        String   @unique
   passwordHash String
-  role         userRole
+  roles         userRole[]
   professionDescription String?
   createdAt    DateTime @default(now())
   updatedAt    DateTime @updatedAt
@@ -66,11 +66,10 @@ model Project {
   ownerId     String  @unique
   status      ProjectStatus @default(DRAFT)
   budget      Float
+  acceptedAmount Float?
   startDate   DateTime
   endDate     DateTime
   address     String
-  latitude    Float
-  longitude   Float
   bidsCloseAt DateTime?
   contractorId String?
   selectedBidId String?
@@ -108,8 +107,9 @@ model Notification{
   userId  String
   type    NotificationType
   title   String
+  message String
   read    Boolean       @default(false)
-  projectId String?
+  projectId String
   bidId  String?
   createdAt DateTime    @default(now())
 

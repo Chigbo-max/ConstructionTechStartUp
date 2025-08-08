@@ -1,26 +1,37 @@
 const userRepository =  require('../repositories/userRepository');
 const bcrypt = require('bcrypt');
+const {cleanProfileResponse} = require('../utils/userProfileResponseCleaner')
 
-const registerUser = async({email, password, firstName, lastName, role, professionDescription}) => {
+const registerUser = async({email, password, firstName, lastName, roles, professionDescription}) => {
 
 
 
-    if(!email || !password || !firstName || !lastName || !role) {
-        return res.status(400).json({message: 'All fields are required'});
+    if(!email || !password || !firstName || !lastName || !roles) {
+        throw new Error('All fields are required');
     }
 
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
     if (!emailRegex.test(email)) {
-        return res.status(400).json({ message: 'Invalid email address' });
+        throw new Error('Invalid email address');
     }
 
 
     const validRoles = ['HOMEOWNER', 'CONTRACTOR', 'OTHER'];
-    if(!role || !validRoles.includes(role)) {
-        throw new Error(`Role must be one of: ${validRoles.join(', ')}`);
+
+    if(!roles || !Array.isArray(roles) || roles.lengh === 0){
+        throw new Error('At least one role is required');
     }
 
-    if(role === 'OTHER' && !professionDescription ) {
+ 
+    for(const role of roles){
+    if(!validRoles.includes(role)) {
+        throw new Error(`Role must be one of: ${validRoles.join(', ')}`);
+        }
+    }
+
+
+
+    if(roles.includes('OTHER') && !professionDescription ) {
         throw new Error('Please specify your profession for role OTHER');
     }
 
@@ -34,9 +45,13 @@ const registerUser = async({email, password, firstName, lastName, role, professi
 
 
     const existingUser = await userRepository.findUserByEmail(email);
-    if(existingUser) {
-        throw new Error('User already exists');
-    }
+    if (existingUser) {
+        const updatedRoles = [...new Set([...existingUser.roles, ...roles])];
+        
+        const updatedUser = await userRepository.updateUserRoles(existingUser.id, updatedRoles);
+        
+        return cleanProfileResponse(updatedUser);
+      }
     
     const name = `${firstName} ${lastName}`;
    
@@ -55,24 +70,17 @@ const registerUser = async({email, password, firstName, lastName, role, professi
         email,
         passwordHash,
         name,
-        role,
+        roles,
     }
 
-    if(role === 'OTHER'){
-        newUserData.professionDescription = professionDescription
+    if(roles.includes('OTHER') && professionDescription){
+        newUserData.professionDescription = professionDescription;
     }
 
 
     const newUser = await userRepository.createUser(newUserData);
+    return cleanProfileResponse(newUser);
 
-    return {
-        id: newUser.id,
-        email: newUser.email,
-        name: newUser.name,
-        role: newUser.role,
-        professionDescription: newUser.professionDescription,
-        createdAt: newUser.createdAt,
-    };
 };
 
 
@@ -81,15 +89,10 @@ const findUserById = async (id) => {
     const user = await userRepository.findUserById(id);
     if (!user) return null;
     
-    return {
-      id: user.id,
-      email: user.email,
-      name: user.name,
-      role: user.role,
-      professionDescription: user.professionDescription,
-      createdAt: user.createdAt,
-    };
+    return cleanProfileResponse(user);
   };
+
+
   
   const findUserByEmail = async (email) => {
     return await userRepository.findUserByEmail(email);
@@ -107,14 +110,8 @@ const findUserById = async (id) => {
     
     const updatedUser = await userRepository.updateUser(userId, filteredData);
     
-    return {
-      id: updatedUser.id,
-      email: updatedUser.email,
-      name: updatedUser.name,
-      role: updatedUser.role,
-      professionDescription: updatedUser.professionDescription,
-      createdAt: updatedUser.createdAt,
-    };
+    return cleanProfileResponse(updatedUser);
+    
   };
   
   
