@@ -11,8 +11,8 @@ const createBid = async ({
   estimatedStartDate,
   estimatedEndDate,
 }) => {
-
-    const project = await projectRepository.findProjectById(projectId);
+  const project = await projectRepository.findProjectById(projectId);
+  
   if (!project) {
     const err = new Error('Project not found');
     err.status = 404;
@@ -32,6 +32,7 @@ const createBid = async ({
   }
 
   const existingBid = await bidRepository.findBidByProjectAndContractor(projectId, contractorId);
+  
   if (existingBid) {
     const err = new Error('You have already submitted a bid for this project');
     err.status = 400;
@@ -110,4 +111,26 @@ const assignBid = async ({ projectId, bidId, ownerId }) => {
     return result;
   };
 
-module.exports = { createBid, assignBid };
+
+  const getBidsByProject = async (projectId, userId) => {
+    const project = await projectRepository.findProjectById(projectId)
+  
+    if (!project) {
+      throw new Error('Project not found');
+    }
+  
+    if (
+      project.ownerId !== userId &&
+      project.contractorId !== userId
+    ) {
+      throw new Error('Unauthorized access');
+    }
+  
+    return await bidRepository.findBidsByProject(projectId)
+  };
+
+module.exports = {
+   createBid,
+   assignBid,
+   getBidsByProject,
+   };

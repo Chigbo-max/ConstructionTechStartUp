@@ -3,9 +3,6 @@ const bcrypt = require('bcrypt');
 const {cleanProfileResponse} = require('../utils/userProfileResponseCleaner')
 
 const registerUser = async({email, password, firstName, lastName, roles, professionDescription}) => {
-
-
-
     if(!email || !password || !firstName || !lastName || !roles) {
         throw new Error('All fields are required');
     }
@@ -15,21 +12,17 @@ const registerUser = async({email, password, firstName, lastName, roles, profess
         throw new Error('Invalid email address');
     }
 
-
     const validRoles = ['HOMEOWNER', 'CONTRACTOR', 'OTHER'];
 
-    if(!roles || !Array.isArray(roles) || roles.lengh === 0){
+    if(!roles || !Array.isArray(roles) || roles.length === 0){
         throw new Error('At least one role is required');
     }
 
- 
     for(const role of roles){
     if(!validRoles.includes(role)) {
         throw new Error(`Role must be one of: ${validRoles.join(', ')}`);
         }
     }
-
-
 
     if(roles.includes('OTHER') && !professionDescription ) {
         throw new Error('Please specify your profession for role OTHER');
@@ -42,7 +35,6 @@ const registerUser = async({email, password, firstName, lastName, roles, profess
             throw new Error('Profession description cannot be empty or just dots');
         }
     }
-
 
     const existingUser = await userRepository.findUserByEmail(email);
     if (existingUser) {
@@ -65,7 +57,6 @@ const registerUser = async({email, password, firstName, lastName, roles, profess
 
     const passwordHash = await bcrypt.hash(password, 10);
 
-
     const newUserData = {
         email,
         passwordHash,
@@ -77,13 +68,9 @@ const registerUser = async({email, password, firstName, lastName, roles, profess
         newUserData.professionDescription = professionDescription;
     }
 
-
     const newUser = await userRepository.createUser(newUserData);
     return cleanProfileResponse(newUser);
-
 };
-
-
 
 const findUserById = async (id) => {
     const user = await userRepository.findUserById(id);
@@ -92,13 +79,11 @@ const findUserById = async (id) => {
     return cleanProfileResponse(user);
   };
 
-
-  
-  const findUserByEmail = async (email) => {
+const findUserByEmail = async (email) => {
     return await userRepository.findUserByEmail(email);
   };
   
-  const updateUser = async (userId, updateData) => {
+const updateUser = async (userId, updateData) => {
     const allowedFields = ['name', 'professionDescription'];
     const filteredData = {};
     
@@ -111,10 +96,7 @@ const findUserById = async (id) => {
     const updatedUser = await userRepository.updateUser(userId, filteredData);
     
     return cleanProfileResponse(updatedUser);
-    
-  };
-  
-  
+};
 
 module.exports = {
     registerUser,

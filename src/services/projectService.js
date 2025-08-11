@@ -18,11 +18,13 @@ const createProject = async ({
   }
 
   const owner = await userRepository.findUserById(ownerId);
+  
   if (!owner) {
     const err = new Error('User not found');
     err.status = 404;
     throw err;
   }
+  
   if (!owner.roles.includes('HOMEOWNER')) {
     const err = new Error('Only homeowners can create projects');
     err.status = 403;
@@ -128,8 +130,47 @@ const updateProjectStatus = async ({ projectId, newStatus, actorUserId }) => {
   return updated;
 };
 
+const getProjectWithDetails = async (projectId, userId) => {
+  
+  const project = await projectRepository.findProjectWithDetails(projectId);
+
+  if (!project) {
+    const err = new Error('Project not found');
+    err.status = 404;
+    throw err;
+  }
+
+  if (
+    project.ownerId !== userId &&
+    project.contractorId !== userId
+  ) {
+    const err = new Error('Unauthorized access');
+    err.status = 403;
+    throw err;
+  }
+
+  return project;
+};
+
+const listProjects = async (userId, userRoles) => {
+  const where = {};
+
+  if (userRoles.includes('HOMEOWNER')) {
+    where.OR = [
+      { ownerId: userId },
+      { status: 'OPEN_FOR_BIDS' }
+    ];
+  } else if (userRoles.includes('CONTRACTOR')) {
+    where.status = 'OPEN_FOR_BIDS';
+  }
+
+  return await projectRepository.findProjects(where);
+};
+
 module.exports = {
   createProject,
   updateProjectStatus,
-  publishProject
+  publishProject,
+  getProjectWithDetails,
+  listProjects,
 };

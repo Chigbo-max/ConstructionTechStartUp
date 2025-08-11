@@ -44,7 +44,7 @@ const notifyBidAssignment = async ({ projectId, acceptedBidId, rejectedBidIds })
     });
 
   } catch (error) {
-    console.error('Notification service error:', error);
+    throw error;
   }
 };
 
@@ -65,13 +65,13 @@ const notifyProjectStatusChange = async ({ projectId, newStatus, userId }) => {
       await notificationRepository.createNotification({
         userId,
         type: 'PROJECT_STATUS_CHANGED',
-        title: `Project ${newStatus.toLowerCase().replace('_', ' ')}`,
+        title: `Project ${newStatus.toLowerCase().replace(/_/g, ' ')}`,
         message,
         projectId,
       });
     }
   } catch (error) {
-    console.error('Notification service error:', error);
+    throw error;
   }
 };
 
@@ -79,7 +79,6 @@ const getUserNotifications = async (userId, { limit = 20, offset = 0, unreadOnly
   try {
     return await notificationRepository.getUserNotifications(userId, { limit, offset, unreadOnly });
   } catch (error) {
-    console.error('Get notifications error:', error);
     throw new Error('Failed to get notifications');
   }
 };
@@ -88,7 +87,6 @@ const markNotificationAsRead = async (notificationId, userId) => {
   try {
     return await notificationRepository.markAsRead(notificationId, userId);
   } catch (error) {
-    console.error('Mark notification as read error:', error);
     throw new Error('Failed to mark notification as read');
   }
 };
@@ -97,13 +95,9 @@ const markAllNotificationsAsRead = async (userId) => {
   try {
     return await notificationRepository.markAllAsRead(userId);
   } catch (error) {
-    console.error('Mark all notifications as read error:', error);
     throw new Error('Failed to mark all notifications as read');
   }
 };
-
-
-
 
 module.exports = {
   notifyBidAssignment,

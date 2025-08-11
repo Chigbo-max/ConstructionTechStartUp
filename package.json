@@ -3,7 +3,13 @@
   "version": "1.0.0",
   "main": "index.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1",
+    "test:migrate": "dotenv -e .env.test prisma migrate deploy",
+    "test:seed": "dotenv -e .env.test node src/tests/utils/seedTestData.js",
+    "test:init": "npm run test:migrate",
+    "test": "npm run test:init && dotenv -e .env.test jest --runInBand --detectOpenHandles",
+    "test:reset": "dotenv -e .env.test prisma migrate reset --force && npm test",
+    "test:dev": "dotenv -e .env.test jest --watch --runInBand",
+    "db:reset": "dotenv -e .env.test prisma migrate reset --force && dotenv -e .env.test prisma migrate deploy && npm run test:seed",
     "dev": "nodemon src/index.js"
   },
   "keywords": [],
@@ -18,6 +24,11 @@
     "prisma": "^6.13.0"
   },
   "devDependencies": {
-    "nodemon": "^3.1.10"
+    "cross-env": "^10.0.0",
+    "dotenv": "^17.2.1",
+    "dotenv-cli": "^10.0.0",
+    "jest": "^30.0.5",
+    "nodemon": "^3.1.10",
+    "supertest": "^7.1.4"
   }
 }

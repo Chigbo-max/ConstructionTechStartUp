@@ -63,7 +63,7 @@ model Project {
   id          String   @id @default(uuid())
   title       String
   description String
-  ownerId     String  @unique
+  ownerId     String
   status      ProjectStatus @default(DRAFT)
   budget      Float
   acceptedAmount Float?

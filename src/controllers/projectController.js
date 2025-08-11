@@ -39,3 +39,27 @@ exports.updateStatus = async (req, res) => {
     return res.status(error.status || 400).json({ message: error.message });
   }
 };
+
+exports.getProjectDetails = async (req, res) => {
+  try {
+    const project = await projectService.getProjectWithDetails(
+      req.params.id,
+      req.user.sub
+    );
+    res.json({ project });
+  } catch (error) {
+    res.status(error.status || 400).json({ message: error.message });
+  }
+};
+
+exports.listProjects = async (req, res) => {
+  try {
+    const projects = await projectService.listProjects(
+      req.user.sub,
+      req.user.allRoles
+    );
+    res.json({ projects });
+  } catch (error) {
+    res.status(500).json({ message: 'Failed to fetch projects' });
+  }
+};

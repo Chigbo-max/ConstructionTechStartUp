@@ -46,6 +46,39 @@ const findProjectsByContractorId = async (contractorId) => {
       orderBy: { createdAt: 'desc' },
     });
   };
+
+  const findProjects = async(whereClause) => {
+    return await prisma.project.findMany({
+        where: whereClause,
+        select: {
+          id: true,
+          title: true,
+          status: true,
+          budget: true,
+          address: true,
+          createdAt: true
+        }
+      });
+  }
+
+  const findProjectWithDetails =  async(projectId) => {
+    return await prisma.project.findUnique({
+        where: { id: projectId },
+        include: {
+          bids: {
+            include: {
+              contractor: {
+                select: { id: true, name: true }
+              }
+            }
+          },
+          milestones: true,
+          owner: {
+            select: { id: true, name: true }
+          }
+        }
+      });
+  }
   
 
 
@@ -55,5 +88,7 @@ module.exports ={
     findProjectByOwnerId,
     updateProject,
     updateProjectStatus,
-    findProjectsByContractorId
+    findProjectsByContractorId,
+    findProjects,
+    findProjectWithDetails,
 }
