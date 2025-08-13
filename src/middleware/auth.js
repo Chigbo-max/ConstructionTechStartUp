@@ -21,11 +21,11 @@ const authenticateToken = (req, res, next) => {
         });
 };
 
-const requireRole = (role) => {
+const requireRole = (allowedRoles) => {
     return (req, res, next) => {
-        if (!req.user.allRoles || !req.user.allRoles.includes(role)){
+        if (!req.user.allRoles || !req.user.allRoles.some(role => allowedRoles.includes(role))){
             return res.status(403).json({
-                message: `Access denied. ${role} role required`
+                message: `Access denied. One of these roles required: ${allowedRoles.join(', ')}`
             });
             }
             next();

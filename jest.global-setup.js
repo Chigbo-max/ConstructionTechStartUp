@@ -47,13 +47,26 @@ module.exports = async () => {
             email: 'brucebruce@gmail.com',
             passwordHash: await bcrypt.hash('password', 10),
             roles: ['CONTRACTOR']
+          },
+          {
+            id: 'user-other',
+            name: 'John Professional',
+            email: 'johnprofessional@gmail.com',
+            passwordHash: await bcrypt.hash('password', 10),
+            roles: ['OTHER']
+          },
+          {
+            id: 'contractor-2',
+            name: 'Jane Contractor',
+            email: 'janecontractor@gmail.com',
+            passwordHash: await bcrypt.hash('password', 10),
+            roles: ['CONTRACTOR']
           }
         ],
         skipDuplicates: true
       });
     } catch (userError) {
-      if (userError.code === 'P2002') {
-      } else {
+      if (userError.code !== 'P2002') {
         throw userError;
       }
     }
@@ -73,12 +86,53 @@ module.exports = async () => {
         }
       });
     } catch (projectError) {
-      if (projectError.code === 'P2002') {
-      } else {
+      if (projectError.code !== 'P2002') {
         throw projectError;
       }
     }
-    
+
+    try {
+      await prisma.professional.create({
+        data: {
+          id: 'professional-1',
+          userId: 'user-other',
+          profession: 'Electrician',
+          location: 'Lagos',
+          availability: true,
+          hourlyRate: 50,
+          experience: 5,
+          skills: ['wiring', 'troubleshooting'],
+          bio: 'Experienced electrician'
+        }
+      });
+    } catch (professionalError) {
+      if (professionalError.code !== 'P2002') {
+        throw professionalError;
+      }
+    }
+
+    try {
+      await prisma.contractorJob.create({
+        data: {
+          id: 'job-1',
+          contractorId: 'contractor-1',
+          title: 'Electrical Installation',
+          description: 'Install electrical fixtures in new building',
+          location: 'Lagos',
+          budget: 5000,
+          requiredProfession: 'Electrician',
+          estimatedDuration: 15,
+          startDate: new Date(),
+          endDate: new Date(Date.now() + 15 * 24 * 60 * 60 * 1000),
+          status: 'OPEN'
+        }
+      });
+    } catch (jobError) {
+      if (jobError.code !== 'P2002') {
+        throw jobError;
+      }
+    }
+
   } catch (error) {
     throw error;
   } finally {

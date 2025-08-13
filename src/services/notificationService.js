@@ -1,4 +1,7 @@
 const notificationRepository = require('../repositories/notificationRepository');
+const professionalRepository = require('../repositories/professionalRepository');
+const userRepository = require('../repositories/userRepository');
+const emailService = require('./emailService');
 
 const notifyBidAssignment = async ({ projectId, acceptedBidId, rejectedBidIds }) => {
   try {
@@ -18,6 +21,17 @@ const notifyBidAssignment = async ({ projectId, acceptedBidId, rejectedBidIds })
           projectId,
           bidId: acceptedBidId,
         });
+
+        // Send email notification
+        const contractor = await userRepository.findUserById(acceptedBid.contractorId);
+        if (contractor) {
+          await emailService.sendBidAcceptedEmail({
+            userEmail: contractor.email,
+            userName: contractor.name,
+            projectTitle: project.title,
+            projectId
+          });
+        }
       }
     }
 
@@ -32,6 +46,17 @@ const notifyBidAssignment = async ({ projectId, acceptedBidId, rejectedBidIds })
           projectId,
           bidId,
         });
+
+        // Send email notification
+        const contractor = await userRepository.findUserById(rejectedBid.contractorId);
+        if (contractor) {
+          await emailService.sendBidRejectedEmail({
+            userEmail: contractor.email,
+            userName: contractor.name,
+            projectTitle: project.title,
+            projectId
+          });
+        }
       }
     }
 
@@ -42,6 +67,17 @@ const notifyBidAssignment = async ({ projectId, acceptedBidId, rejectedBidIds })
       message: `Your project "${project.title}" has been assigned to a contractor.`,
       projectId,
     });
+
+    // Send email notification to homeowner
+    const homeowner = await userRepository.findUserById(project.ownerId);
+    if (homeowner) {
+      await emailService.sendProjectAssignedEmail({
+        userEmail: homeowner.email,
+        userName: homeowner.name,
+        projectTitle: project.title,
+        projectId
+      });
+    }
 
   } catch (error) {
     throw error;
@@ -69,6 +105,18 @@ const notifyProjectStatusChange = async ({ projectId, newStatus, userId }) => {
         message,
         projectId,
       });
+
+      // Send email notification
+      const user = await userRepository.findUserById(userId);
+      if (user) {
+        await emailService.sendProjectStatusChangeEmail({
+          userEmail: user.email,
+          userName: user.name,
+          projectTitle: project.title,
+          newStatus,
+          projectId
+        });
+      }
     }
   } catch (error) {
     throw error;
@@ -99,10 +147,67 @@ const markAllNotificationsAsRead = async (userId) => {
   }
 };
 
+const notifyJobApplicationReceived = async ({ contractorId, jobId, professionalId }) => {
+  await notificationRepository.createNotification({
+    userId: contractorId,
+    type: 'JOB_APPLICATION_RECEIVED',
+    title: 'New Job Application',
+    message: `A professional applied to your job.`,
+    jobId,
+  });
+
+  // Send email notification to contractor
+  const contractor = await userRepository.findUserById(contractorId);
+  if (contractor) {
+    const job = await require('../repositories/contractorJobRepository').findById(jobId);
+    if (job) {
+      await emailService.sendJobApplicationReceivedEmail({
+        userEmail: contractor.email,
+        userName: contractor.name,
+        jobTitle: job.title,
+        jobId
+      });
+    }
+  }
+};
+
+const notifyJobApplicationDecision = async ({ professionalId, jobId, decision }) => {
+  const professional = await professionalRepository.findById(professionalId);
+  if (!professional) {
+    throw new Error('Professional not found');
+  }
+  
+  const isApproved = decision === 'APPROVED';
+  await notificationRepository.createNotification({
+    userId: professional.userId,
+    type: isApproved ? 'JOB_APPLICATION_APPROVED' : 'JOB_APPLICATION_REJECTED',
+    title: isApproved ? 'Application Approved' : 'Application Rejected',
+    message: isApproved ? 'Your application was approved.' : 'Your application was rejected.',
+    jobId,
+  });
+
+  // Send email notification to professional
+  const user = await userRepository.findUserById(professional.userId);
+  if (user) {
+    const job = await require('../repositories/contractorJobRepository').findById(jobId);
+    if (job) {
+      await emailService.sendJobApplicationDecisionEmail({
+        userEmail: user.email,
+        userName: user.name,
+        jobTitle: job.title,
+        decision,
+        jobId
+      });
+    }
+  }
+};
+
 module.exports = {
   notifyBidAssignment,
   notifyProjectStatusChange,
   getUserNotifications,
   markNotificationAsRead,
   markAllNotificationsAsRead,
+  notifyJobApplicationReceived,
+  notifyJobApplicationDecision,
 };
