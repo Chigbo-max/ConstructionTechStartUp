@@ -1,8 +1,8 @@
-import React from 'react';
 import { useSelector, useDispatch } from 'react-redux';
 import { Link } from 'react-router-dom';
 import { selectIsAuthenticated, selectCurrentUser, selectCurrentRole, logout } from '../../features/auth/authSlice';
 import { openModal, toggleSidebar } from '../../features/ui/uiSlice';
+import Logo from "../../assets/logo.png"
 
 const Header = () => {
   const dispatch = useDispatch();
@@ -43,34 +43,53 @@ const Header = () => {
               </button>
             )}
             <div className="flex-shrink-0">
-              <h1 className="text-2xl font-bold text-primary-500">
-                Construction Tech
-              </h1>
+              <Link to="/" className="block">
+                <img src={Logo} alt="Houzzify Logo" className="w-32 sm:w-40 md:w-48 lg:w-52 p-5 mt-6 h-auto" />
+              </Link>
             </div>
           </div>
 
           {/* Navigation */}
-          <nav className="hidden md:flex space-x-8">
-            <Link to="/projects" className="text-gray-700 hover:text-primary-500 px-3 py-2 rounded-md text-sm font-medium transition-colors cursor-pointer">
-              Projects
-            </Link>
-            <Link to="/jobs" className="text-gray-700 hover:text-primary-500 px-3 py-2 rounded-md text-sm font-medium transition-colors cursor-pointer">
-              Jobs
-            </Link>
-            <Link to="/contractors" className="text-gray-700 hover:text-primary-500 px-3 py-2 rounded-md text-sm font-medium transition-colors cursor-pointer">
-              Contractors
-            </Link>
-            <Link to="/about" className="text-gray-700 hover:text-primary-500 px-3 py-2 rounded-md text-sm font-medium transition-colors cursor-pointer">
-              About
-            </Link>
-          </nav>
+          <div>
+            {isAuthenticated ? (
+              <nav className="hidden md:flex space-x-8">
+
+                <Link to="/projects" className="text-gray-700 hover:text-primary-500 px-3 py-2 rounded-md text-sm font-medium transition-colors cursor-pointer">
+                  Projects
+                </Link>
+                <Link to="/jobs" className="text-gray-700 hover:text-primary-500 px-3 py-2 rounded-md text-sm font-medium transition-colors cursor-pointer">
+                  Jobs
+                </Link>
+                <Link to="/contractors" className="text-gray-700 hover:text-primary-500 px-3 py-2 rounded-md text-sm font-medium transition-colors cursor-pointer">
+                  Contractors
+                </Link>
+                <Link to="/about" className="text-gray-700 hover:text-primary-500 px-3 py-2 rounded-md text-sm font-medium transition-colors cursor-pointer">
+                  About
+                </Link>
+              </nav>
+            ) :
+              (
+                <nav className="hidden md:flex space-x-8">
+                  <Link to="/about" className="text-gray-700 hover:text-primary-500 px-3 py-2 rounded-md text-sm font-medium transition-colors cursor-pointer">
+                    About
+                  </Link>
+                  <Link to="/contactUs" className="text-gray-700 hover:text-primary-500 px-3 py-2 rounded-md text-sm font-medium transition-colors cursor-pointer">
+                    Contact us
+                  </Link>
+                </nav>
+
+              )}
+
+          </div>
 
           {/* User Actions */}
           <div className="flex items-center space-x-4">
             {isAuthenticated ? (
               <div className="flex items-center space-x-4">
                 <div className="text-sm text-gray-700">
-                  <span className="font-medium">{currentUser?.name}</span>
+                  <Link to="/dashboard">
+                    <span className="font-medium">{currentUser?.name}</span>
+                  </Link>
                   <span className="ml-2 px-2 py-1 bg-primary-100 text-primary-700 rounded-full text-xs">
                     {currentRole}
                   </span>

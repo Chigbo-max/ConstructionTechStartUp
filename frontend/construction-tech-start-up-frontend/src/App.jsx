@@ -1,66 +1,71 @@
 import React from 'react';
-import { useSelector, useDispatch } from 'react-redux';
-import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
-import Header from './components/Layout/Header';
-import Sidebar from './components/Layout/Sidebar';
-import LoginModal from './components/Auth/LoginModal';
-import RegisterModal from './components/Auth/RegisterModal';
+import { Toaster } from 'react-hot-toast';
+import ErrorBoundary from './pages/ErrorPages/ErrorBoundary';
 import ForgotPasswordModal from './components/Auth/ForgotPasswordModal';
 import ResetPasswordModal from './components/Auth/ResetPasswordModal';
 import Notification from './components/UI/Notification';
-import Dashboard from './pages/Dashboard/Dashboard';
-import Projects from './pages/Projects/Projects';
-import Jobs from './pages/Jobs/Jobs';
-import Profile from './pages/Profile/Profile';
-import About from './pages/About/About';
-import Landing from './components/Landing/Landing';
-import { selectIsAuthenticated } from './features/auth/authSlice';
+import router from './routes/Routes';
+import { RouterProvider } from 'react-router-dom';
+import ServerDown from './pages/ErrorPages/ServerDown';
+import NoInternet from './pages/ErrorPages/NoInternet';
 
 function App() {
-  const dispatch = useDispatch();
-  const isAuthenticated = useSelector(selectIsAuthenticated);
+  const [hasServerError, setHasServerError] = React.useState(false);
+  const [isOnline, setIsOnline] = React.useState(navigator.onLine);
+
+  React.useEffect(() => {
+    const handleOnline = () => setIsOnline(true);
+    const handleOffline = () => setIsOnline(false);
+    window.addEventListener('online', handleOnline);
+    window.addEventListener('offline', handleOffline);
+    return () => {
+      window.removeEventListener('online', handleOnline);
+      window.removeEventListener('offline', handleOffline);
+    };
+  }, []);
+
+  // Global fetch error handler
+  React.useEffect(() => {
+    const origFetch = window.fetch;
+    window.fetch = async (...args) => {
+      try {
+        const response = await origFetch(...args);
+        if (!response.ok && response.status >= 500) {
+          setHasServerError(true);
+        }
+        return response;
+      } catch (err) {
+        if (!navigator.onLine) {
+          setIsOnline(false);
+        } else {
+          setHasServerError(true);
+        }
+        throw err;
+      }
+    };
+    return () => {
+      window.fetch = origFetch;
+    };
+  }, []);
+
+  if (!isOnline) return <NoInternet />;
+  if (hasServerError) return <ServerDown />;
 
   return (
-    <Router>
-      <div className="min-h-screen bg-gray-50">
-        <Header />
+    <ErrorBoundary>
+          <Toaster position="top-center" richColors />
+          <RouterProvider router={router} />
         
-        <div className="flex">
-          {/* Sidebar for authenticated users */}
-          {isAuthenticated && <Sidebar />}
-          
-          {/* Main content */}
-          <main className={`flex-1 ${isAuthenticated ? 'lg:ml-64' : ''}`}>
-            {!isAuthenticated ? (
-              <Routes>
-                <Route path="/about" element={<About />} />
-                <Route path="*" element={<Landing />} />
-              </Routes>
-            ) : (
-              <Routes>
-                <Route path="/" element={<Navigate to="/dashboard" replace />} />
-                <Route path="/dashboard" element={<Dashboard />} />
-                <Route path="/projects" element={<Projects />} />
-                <Route path="/jobs" element={<Jobs />} />
-                <Route path="/profile" element={<Profile />} />
-                <Route path="/about" element={<About />} />
-                <Route path="*" element={<Navigate to="/dashboard" replace />} />
-              </Routes>
-            )}
-          </main>
-        </div>
-
-        {/* Modals */}
-        <LoginModal />
-        <RegisterModal />
         <ForgotPasswordModal />
         <ResetPasswordModal />
         
         {/* Notifications */}
         <Notification />
-      </div>
-    </Router>
+    </ErrorBoundary>
+
+
   );
 }
 
 export default App;
+

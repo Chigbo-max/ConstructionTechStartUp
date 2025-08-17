@@ -2,7 +2,7 @@ import { createSlice } from '@reduxjs/toolkit';
 
 const initialState = {
   user: null,
-  token: localStorage.getItem('token'),
+  token: null,
   isAuthenticated: false,
   currentRole: null,
   loading: false,
@@ -20,7 +20,6 @@ const authSlice = createSlice({
       state.isAuthenticated = true;
       state.currentRole = user.roles[0];
       state.error = null;
-      localStorage.setItem('token', token);
     },
     setCurrentRole: (state, action) => {
       state.currentRole = action.payload;
@@ -31,7 +30,6 @@ const authSlice = createSlice({
       state.isAuthenticated = false;
       state.currentRole = null;
       state.error = null;
-      localStorage.removeItem('token');
     },
     setLoading: (state, action) => {
       state.loading = action.payload;

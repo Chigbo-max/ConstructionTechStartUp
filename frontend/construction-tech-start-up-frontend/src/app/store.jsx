@@ -1,9 +1,18 @@
 import { configureStore } from '@reduxjs/toolkit';
 import { setupListeners } from '@reduxjs/toolkit/query';
+import { persistStore, persistReducer } from 'redux-persist';
+import storage from 'redux-persist/lib/storage';
 
 // Import slices
 import authReducer from '../features/auth/authSlice';
 import uiReducer from '../features/ui/uiSlice';
+
+// Configure persist
+const authPersistConfig = {
+  key: 'auth',
+  storage,
+  whitelist: ['user', 'token', 'isAuthenticated', 'currentRole']
+};
 
 // Import APIs
 import { authApi } from '../features/auth/authApi';
@@ -15,7 +24,7 @@ import { milestonesApi } from '../features/milestones/milestonesApi';
 export const store = configureStore({
   reducer: {
     // Slices
-    auth: authReducer,
+    auth: persistReducer(authPersistConfig, authReducer),
     ui: uiReducer,
     
     // APIs
@@ -29,7 +38,12 @@ export const store = configureStore({
   // Adding the api middleware enables caching, invalidation, polling,
   // and other useful features of `rtk-query`.
   middleware: (getDefaultMiddleware) =>
-    getDefaultMiddleware().concat(
+    getDefaultMiddleware({
+      serializableCheck: {
+        // Ignore these action types as they contain non-serializable values
+        ignoredActions: ['persist/PERSIST', 'persist/REHYDRATE'],
+      },
+    }).concat(
       authApi.middleware,
       projectsApi.middleware,
       jobsApi.middleware,
@@ -41,5 +55,7 @@ export const store = configureStore({
 // Optional, but required for refetchOnFocus/refetchOnReconnect behaviors
 // see `setupListeners` docs - takes an optional callback as the 2nd arg for customization
 setupListeners(store.dispatch);
+
+export const persistor = persistStore(store);
 
 export default store;

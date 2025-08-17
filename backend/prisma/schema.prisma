@@ -1,0 +1,206 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id                    String               @id @default(uuid())
+  name                  String
+  email                 String               @unique
+  passwordHash          String
+  roles                 userRole[]
+  professionDescription String?
+  createdAt             DateTime             @default(now())
+  updatedAt             DateTime             @updatedAt
+  bids                  Bid[]                @relation("UserBids")
+  contractorJobs        ContractorJob[]      @relation("ContractorJobCreator")
+  jobApplications       JobApplication[]     @relation("JobApplicationApplicant")
+  notifications         Notification[]
+  passwordResetTokens   PasswordResetToken[] @relation("UserPasswordReset")
+  professional          Professional?        @relation("UserProfessional")
+  contractorProjects    Project[]            @relation("ProjectContractor")
+  projects              Project[]            @relation("UserProjects")
+}
+
+model Project {
+  id             String         @id @default(uuid())
+  title          String
+  description    String
+  ownerId        String
+  status         ProjectStatus  @default(DRAFT)
+  budget         Float
+  acceptedAmount Float?
+  startDate      DateTime
+  endDate        DateTime
+  address        String
+  bidsCloseAt    DateTime?
+  contractorId   String?
+  selectedBidId  String?
+  createdAt      DateTime       @default(now())
+  updatedAt      DateTime       @updatedAt
+  bids           Bid[]
+  milestones     Milestone[]
+  notifications  Notification[]
+  contractor     User?          @relation("ProjectContractor", fields: [contractorId], references: [id])
+  owner          User           @relation("UserProjects", fields: [ownerId], references: [id])
+}
+
+model Bid {
+  id                 String    @id @default(uuid())
+  projectId          String
+  contractorId       String
+  amount             Float
+  proposal           String
+  estimatedDuration  Int
+  status             BidStatus @default(PENDING)
+  estimatedStartDate DateTime
+  estimatedEndDate   DateTime
+  createdAt          DateTime  @default(now())
+  contractor         User      @relation("UserBids", fields: [contractorId], references: [id])
+  project            Project   @relation(fields: [projectId], references: [id])
+
+  @@unique([projectId, contractorId])
+}
+
+model Professional {
+  id              String           @id @default(uuid())
+  userId          String           @unique
+  profession      String
+  location        String
+  availability    Boolean          @default(true)
+  hourlyRate      Float?
+  experience      Int?
+  skills          String[]
+  bio             String?
+  createdAt       DateTime         @default(now())
+  updatedAt       DateTime         @updatedAt
+  jobApplications JobApplication[] @relation("ProfessionalApplications")
+  user            User             @relation("UserProfessional", fields: [userId], references: [id])
+}
+
+model ContractorJob {
+  id                 String           @id @default(uuid())
+  contractorId       String
+  title              String
+  description        String
+  location           String
+  budget             Float
+  requiredProfession String
+  estimatedDuration  Int
+  status             JobStatus        @default(OPEN)
+  startDate          DateTime
+  endDate            DateTime
+  createdAt          DateTime         @default(now())
+  updatedAt          DateTime         @updatedAt
+  contractor         User             @relation("ContractorJobCreator", fields: [contractorId], references: [id])
+  applications       JobApplication[] @relation("JobApplications")
+  notifications      Notification[]   @relation("ContractorJobNotifications")
+}
+
+model JobApplication {
+  id                 String            @id @default(uuid())
+  jobId              String
+  professionalId     String
+  contractorId       String
+  coverLetter        String
+  proposedRate       Float
+  estimatedStartDate DateTime
+  estimatedEndDate   DateTime
+  status             ApplicationStatus @default(PENDING)
+  createdAt          DateTime          @default(now())
+  updatedAt          DateTime          @updatedAt
+  contractor         User              @relation("JobApplicationApplicant", fields: [contractorId], references: [id])
+  job                ContractorJob     @relation("JobApplications", fields: [jobId], references: [id])
+  professional       Professional      @relation("ProfessionalApplications", fields: [professionalId], references: [id])
+
+  @@unique([jobId, professionalId])
+}
+
+model Notification {
+  id            String           @id @default(uuid())
+  userId        String
+  type          NotificationType
+  title         String
+  message       String
+  read          Boolean          @default(false)
+  projectId     String?
+  bidId         String?
+  createdAt     DateTime         @default(now())
+  jobId         String?
+  contractorJob ContractorJob?   @relation("ContractorJobNotifications", fields: [jobId], references: [id])
+  project       Project?         @relation(fields: [projectId], references: [id])
+  user          User             @relation(fields: [userId], references: [id])
+}
+
+model Milestone {
+  id          String   @id @default(uuid())
+  projectId   String
+  title       String
+  description String
+  dueDate     DateTime
+  status      String
+  createdAt   DateTime @default(now())
+  project     Project  @relation(fields: [projectId], references: [id])
+}
+
+model PasswordResetToken {
+  id        String   @id @default(uuid())
+  userId    String
+  token     String   @unique
+  expiresAt DateTime
+  createdAt DateTime @default(now())
+  used      Boolean  @default(false)
+  user      User     @relation("UserPasswordReset", fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([token])
+  @@index([userId])
+}
+
+enum userRole {
+  HOMEOWNER
+  CONTRACTOR
+  OTHER
+}
+
+enum ProjectStatus {
+  DRAFT
+  PUBLISHED
+  OPEN_FOR_BIDS
+  ACTIVE
+  COMPLETED
+  CANCELLED
+}
+
+enum BidStatus {
+  PENDING
+  ACCEPTED
+  REJECTED
+}
+
+enum NotificationType {
+  BID_ACCEPTED
+  BID_REJECTED
+  PROJECT_ASSIGNED
+  PROJECT_COMPLETED
+  JOB_POSTED
+  JOB_APPLICATION_RECEIVED
+  JOB_APPLICATION_APPROVED
+  JOB_APPLICATION_REJECTED
+}
+
+enum JobStatus {
+  OPEN
+  IN_PROGRESS
+  COMPLETED
+  CANCELLED
+}
+
+enum ApplicationStatus {
+  PENDING
+  APPROVED
+  REJECTED
+}
