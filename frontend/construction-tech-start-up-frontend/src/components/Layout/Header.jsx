@@ -47,14 +47,16 @@ const Header = () => {
                 <img src={Logo} alt="Houzzify Logo" className="w-32 sm:w-40 md:w-48 lg:w-52 p-5 mt-6 h-auto" />
               </Link>
             </div>
-          </div>
+          </div>       
 
-          {/* Navigation */}
-          <div>
+          <div className="flex items-center space-x-4">
             {isAuthenticated ? (
-              <nav className="hidden md:flex space-x-8">
-
-                <Link to="/projects" className="text-gray-700 hover:text-primary-500 px-3 py-2 rounded-md text-sm font-medium transition-colors cursor-pointer">
+              <div className="flex items-center space-x-4">
+                <div className="text-sm text-gray-700">
+                  <Link to="/dashboard">
+                    <span className="font-medium">{currentUser?.name}</span>
+                  </Link>
+                  <Link to="/projects" className="text-gray-700 hover:text-primary-500 px-3 py-2 rounded-md text-sm font-medium transition-colors cursor-pointer">
                   Projects
                 </Link>
                 <Link to="/jobs" className="text-gray-700 hover:text-primary-500 px-3 py-2 rounded-md text-sm font-medium transition-colors cursor-pointer">
@@ -66,30 +68,6 @@ const Header = () => {
                 <Link to="/about" className="text-gray-700 hover:text-primary-500 px-3 py-2 rounded-md text-sm font-medium transition-colors cursor-pointer">
                   About
                 </Link>
-              </nav>
-            ) :
-              (
-                <nav className="hidden md:flex space-x-8">
-                  <Link to="/about" className="text-gray-700 hover:text-primary-500 px-3 py-2 rounded-md text-sm font-medium transition-colors cursor-pointer">
-                    About
-                  </Link>
-                  <Link to="/contactUs" className="text-gray-700 hover:text-primary-500 px-3 py-2 rounded-md text-sm font-medium transition-colors cursor-pointer">
-                    Contact us
-                  </Link>
-                </nav>
-
-              )}
-
-          </div>
-
-          {/* User Actions */}
-          <div className="flex items-center space-x-4">
-            {isAuthenticated ? (
-              <div className="flex items-center space-x-4">
-                <div className="text-sm text-gray-700">
-                  <Link to="/dashboard">
-                    <span className="font-medium">{currentUser?.name}</span>
-                  </Link>
                   <span className="ml-2 px-2 py-1 bg-primary-100 text-primary-700 rounded-full text-xs">
                     {currentRole}
                   </span>
@@ -103,6 +81,13 @@ const Header = () => {
               </div>
             ) : (
               <div className="flex items-center space-x-4">
+
+                 <Link to="/about" className="text-gray-700 hover:text-primary-500 px-3 py-2 rounded-md text-sm font-medium transition-colors cursor-pointer">
+                    About
+                  </Link>
+                  <Link to="/contactUs" className="text-gray-700 hover:text-primary-500 px-3 py-2 rounded-md text-sm font-medium transition-colors cursor-pointer">
+                    Contact us
+                  </Link>
                 <button
                   onClick={handleLogin}
                   className="text-primary-600 hover:text-primary-700 px-4 py-2 rounded-md text-sm font-medium transition-colors"

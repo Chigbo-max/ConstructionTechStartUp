@@ -23,7 +23,7 @@ const Contact = () => {
             transition={{ duration: 1, ease: "easeOut" }}
             className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl xl:text-7xl font-black text-white mb-8 drop-shadow-lg leading-tight mx-auto"
           >
-            <span className="text-amber-400">Contact</span> Us
+            <span className="text-primary-500">Contact</span> Us
           </motion.h1>
           <motion.p
             initial={{ x: "100vw", opacity: 0 }}
@@ -36,6 +36,20 @@ const Contact = () => {
         </div>
       </section>
 
+      <div className="w-full flex flex-col md:flex-row justify-center items-center gap-12 p-12">
+  {/* Phone */}
+  <div className="w-full md:w-1/3 text-center md:text-left">
+    <h2 className="text-2xl font-bold text-primary-500">Phone</h2>
+    <p className="text-lg">+234 700 000 0000</p>
+  </div>
+
+  {/* Email */}
+  <div className="w-full md:w-1/3 text-center md:text-left">
+    <h2 className="text-2xl font-bold text-primary-500">Email</h2>
+    <p className="text-lg">hello@houzzify.com</p>
+  </div>
+</div>
+
       <div className="w-full px-4 sm:px-6 lg:px-8 py-16 bg-gradient-to-br from-gray-50 to-amber-50">
         <div className="max-w-7xl mx-auto">
           <section id="contact" className="py-12 bg-white rounded-2xl shadow-xl">
@@ -45,7 +59,7 @@ const Contact = () => {
               <div className="flex flex-col items-center w-full text-center bg-gray-50 p-6 rounded-xl shadow-lg">
                 <h3 className="text-lg font-bold text-gray-900 mb-2">Nigeria Data Protection Regulation (NDPR), 2019</h3>
                 <p className="text-gray-700 max-w-xl mx-auto">
-                  We are committed to protecting your privacy. Whenever you use our website, complete an application form or contact us electronically, you consent to our processing of your personal information in accordance with the requirements of NDPR. In the event that you wish to revoke your consent, please send an email to cprofessionalsnetwork@gmail.com.
+                  We are committed to protecting your privacy. Whenever you use our website, complete an application form or contact us electronically, you consent to our processing of your personal information in accordance with the requirements of NDPR. In the event that you wish to revoke your consent, please send an email to hello@houzzify.com.
                 </p>
               </div>
             </div>

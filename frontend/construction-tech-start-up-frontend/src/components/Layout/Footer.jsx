@@ -27,7 +27,8 @@ function Footer() {
                             <img 
                                 src={FooterLogo} 
                                 alt="Houzzify Logo" 
-                                className="w-32 sm:w-40 h-auto mb-4 sm:mb-6"
+                                className="w-32 bg-white rounded sm:w-40 h-auto mb-4 sm:mb-6"
+
                             />
                             <p className="text-gray-300 text-sm leading-relaxed mb-4 sm:mb-6">
                                 We help construction professionals find clients, and clients find construction professionals.
@@ -38,7 +39,7 @@ function Footer() {
 
                         {/* Quick Links */}
                         <div className="sm:col-span-1">
-                            <h3 className="text-base sm:text-lg font-bold text-amber-400 mb-4 sm:mb-6">Quick Links</h3>
+                            <h3 className="text-base sm:text-lg font-bold text-primary-500 mb-4 sm:mb-6">Quick Links</h3>
                             <ul className="space-y-2 sm:space-y-3">
                                 {quickLinks.concat([
                                     { title: "Terms of Service", path: "/terms" },
@@ -58,10 +59,10 @@ function Footer() {
 
                         {/* Contact Information */}
                         <div className="sm:col-span-2 lg:col-span-1">
-                            <h3 className="text-base sm:text-lg font-bold text-amber-400 mb-4 sm:mb-6">Contact Info</h3>
+                            <h3 className="text-base sm:text-lg font-bold text-primary-500 mb-4 sm:mb-6">Contact Info</h3>
                             <div className="space-y-3 sm:space-y-4">
                                 <div className="flex items-start space-x-3">
-                                    <FontAwesomeIcon icon={faPhone} className="text-amber-400 mt-1 text-sm" />
+                                    <FontAwesomeIcon icon={faPhone} className="text-primary-500 mt-1 text-sm" />
                                     <div>
                                         <p className="text-gray-300 text-sm font-medium">Phone</p>
                                         <p className="text-gray-400 text-sm">+234 700 000 0000</p>
@@ -69,7 +70,7 @@ function Footer() {
                                 </div>
                                 
                                 <div className="flex items-start space-x-3">
-                                    <FontAwesomeIcon icon={faEnvelope} className="text-amber-400 mt-1 text-sm" />
+                                    <FontAwesomeIcon icon={faEnvelope} className="text-primary-500 mt-1 text-sm" />
                                     <div>
                                         <p className="text-gray-300 text-sm font-medium">Email</p>
                                         <p className="text-gray-400 text-sm">hello@houzzify.com</p>
