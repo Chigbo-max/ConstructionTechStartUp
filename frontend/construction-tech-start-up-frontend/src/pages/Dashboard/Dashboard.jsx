@@ -1,8 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useSelector } from 'react-redux';
 import { selectCurrentUser, selectCurrentRole } from '../../features/auth/authSlice';
-import { useGetProjectsQuery, useCreateProjectMutation } from '../../features/projects/projectsApi';
-import { useGetJobsQuery } from '../../features/jobs/jobsApi';
+import { useGetProjectsQuery} from '../../features/projects/projectsApi';
 import { useGetNotificationsQuery } from '../../features/notifications/notificationsApi';
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer, PieChart, Pie, Cell } from 'recharts';
 import { FiHome, FiTool, FiClipboard, FiCheckCircle, FiClock, FiBell, FiPlus, FiSearch, FiEdit, FiTrendingUp, FiEye, FiBriefcase, FiPhoneCall, FiBook } from 'react-icons/fi';
@@ -16,9 +15,7 @@ const Dashboard = () => {
   const navigate = useNavigate();
   
   const { data: projectsData, isLoading: projectsLoading } = useGetProjectsQuery();
-  const { data: jobs = [], isLoading: jobsLoading } = useGetJobsQuery();
   const { data: notifications = [], isLoading: notificationsLoading } = useGetNotificationsQuery();
-  const [createProject] = useCreateProjectMutation();
 
 
   const projects = Array.isArray(projectsData)
