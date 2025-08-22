@@ -51,7 +51,7 @@ navigate('/register')
                 <img
                   src={Logo}
                   alt="Houzzify Logo"
-                  className="w-32 sm:w-40 md:w-48 lg:w-52 p-2 h-auto mt-6"
+                  className="w-32 sm:w-40 md:w-35 lg:w-44 p-2 h-auto mt-6"
                 />
               </Link>
             </div>

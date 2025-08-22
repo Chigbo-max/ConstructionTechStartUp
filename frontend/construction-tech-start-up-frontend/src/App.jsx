@@ -59,7 +59,6 @@ function App() {
         <ForgotPasswordModal />
         <ResetPasswordModal />
         
-        {/* Notifications */}
         <Notification />
     </ErrorBoundary>
 

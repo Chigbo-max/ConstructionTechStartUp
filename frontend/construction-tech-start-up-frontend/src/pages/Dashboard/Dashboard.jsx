@@ -1,7 +1,8 @@
 import { useState, useEffect } from 'react';
 import { useSelector } from 'react-redux';
 import { selectCurrentUser, selectCurrentRole } from '../../features/auth/authSlice';
-import { useGetProjectsQuery} from '../../features/projects/projectsApi';
+import { useGetProjectsQuery, useCreateProjectMutation } from '../../features/projects/projectsApi';
+import { useGetJobsQuery } from '../../features/jobs/jobsApi';
 import { useGetNotificationsQuery } from '../../features/notifications/notificationsApi';
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer, PieChart, Pie, Cell } from 'recharts';
 import { FiHome, FiTool, FiClipboard, FiCheckCircle, FiClock, FiBell, FiPlus, FiSearch, FiEdit, FiTrendingUp, FiEye, FiBriefcase, FiPhoneCall, FiBook } from 'react-icons/fi';
@@ -15,6 +16,7 @@ const Dashboard = () => {
   const navigate = useNavigate();
   
   const { data: projectsData, isLoading: projectsLoading } = useGetProjectsQuery();
+  const { isLoading: jobsLoading } = useGetJobsQuery();
   const { data: notifications = [], isLoading: notificationsLoading } = useGetNotificationsQuery();
 
 
@@ -33,9 +35,9 @@ const Dashboard = () => {
       case 'HOMEOWNER':
         return [
           { title: 'Active Projects', value: activeProjects.length, color: 'bg-primary-500', icon: <FiHome className="w-6 h-6" /> },
-          { title: 'Completed Projects', value: completedProjects.length, color: 'bg-green-500', icon: <FiCheckCircle className="w-6 h-6" /> },
-          { title: 'Pending Bids', value: pendingBids.length, color: 'bg-yellow-500', icon: <FiClock className="w-6 h-6" /> },
-          { title: 'Total Spent', value: '₦0', color: 'bg-blue-500', icon:<FontAwesomeIcon icon={faNairaSign} className="w-6 h-6" /> }
+          { title: 'Completed Projects', value: completedProjects.length, color: 'bg-primary-500', icon: <FiCheckCircle className="w-6 h-6" /> },
+          { title: 'Pending Bids', value: pendingBids.length, color: 'bg-primary-500', icon: <FiClock className="w-6 h-6" /> },
+          { title: 'Total Spent', value: '0', color: 'bg-primary-500', icon:<FontAwesomeIcon icon={faNairaSign} className="w-6 h-6" /> }
 
         ];
       case 'CONTRACTOR':
@@ -109,9 +111,9 @@ const Dashboard = () => {
       case 'HOMEOWNER':
         return [
           { title: 'Create New Project', action: 'createProject', icon: <FiPlus className="w-6 h-6" />, color: 'bg-primary-500 hover:bg-primary-600' },
-          { title: 'Find Contractors', action: 'findContractors', icon: <FiSearch className="w-6 h-6" />, color: 'bg-green-500 hover:bg-green-600' },
-          { title: 'View Bids', action: 'viewBids', icon: <FiClipboard className="w-6 h-6" />, color: 'bg-yellow-500 hover:bg-yellow-600' },
-          { title: 'Track Progress', action: 'trackProgress', icon: <FiTrendingUp className="w-6 h-6" />, color: 'bg-blue-500 hover:bg-blue-600' }
+          { title: 'Find Contractors', action: 'findContractors', icon: <FiSearch className="w-6 h-6" />, color: 'bg-primary-500 hover:bg-primary-600' },
+          { title: 'View Bids', action: 'viewBids', icon: <FiClipboard className="w-6 h-6" />, color: 'bg-primary-500 hover:bg-primary-600' },
+          { title: 'Track Progress', action: 'trackProgress', icon: <FiTrendingUp className="w-6 h-6" />, color: 'bg-primary-500 hover:bg-primary-600' }
         ];
       case 'CONTRACTOR':
         return [
@@ -262,8 +264,8 @@ const Dashboard = () => {
         </div>
 
         {/* Quick Actions */}
-        <div className="bg-white rounded-lg shadow-md p-6 mb-8">
-          <h2 className="text-2xl font-bold text-gray-900 mb-6">Quick Actions</h2>
+        <div className="bg-gradient-to-r from-primary-500 to-primary-600 rounded-lg shadow-md p-6 mb-8">
+          <h2 className="text-2xl font-bold text-white mb-6">Quick Actions</h2>
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
             {getQuickActions().map((action, index) => (
               <button
