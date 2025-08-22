@@ -7,13 +7,15 @@ const Notification = () => {
   const notification = useSelector(selectNotifications);
 
   useEffect(() => {
+    let timer;
     if (notification.show) {
-      const timer = setTimeout(() => {
+      timer = setTimeout(() => {
         dispatch(hideNotification());
       }, 5000);
-
-      return () => clearTimeout(timer);
     }
+    return () => {
+      if (timer) clearTimeout(timer);
+    };
   }, [notification.show, dispatch]);
 
   if (!notification.show) return null;

@@ -1,8 +1,17 @@
-import React from 'react';
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { useSelector, useDispatch } from 'react-redux';
 import { Link } from 'react-router-dom';
 import { setSidebarOpen, selectSidebarOpen } from '../../features/ui/uiSlice';
 import { logout, selectCurrentUser, selectCurrentRole } from '../../features/auth/authSlice';
+import { 
+  faHome, 
+  faProjectDiagram, 
+  faBriefcase, 
+  faUser, 
+  faClipboardList, 
+  faFileAlt, 
+  faSignOutAlt 
+} from "@fortawesome/free-solid-svg-icons";
 
 const Sidebar = () => {
   const dispatch = useDispatch();
@@ -16,18 +25,18 @@ const Sidebar = () => {
   };
 
   const getNavigationItems = () => {
-    const baseItems = [
-      { name: 'Dashboard', href: '/dashboard', icon: '🏠' },
-      { name: 'Projects', href: '/projects', icon: '🏗️' },
-      { name: 'Jobs', href: '/jobs', icon: '💼' },
-      { name: 'Profile', href: '/profile', icon: '👤' },
-    ];
+     const baseItems = [
+    { name: 'Dashboard', href: '/dashboard', icon: faHome },
+    { name: 'Projects', href: '/projects', icon: faProjectDiagram },
+    { name: 'Jobs', href: '/jobs', icon: faBriefcase },
+    { name: 'Profile', href: '/profile', icon: faUser },
+  ];
 
-    if (currentRole === 'HOMEOWNER') {
-      baseItems.splice(2, 0, { name: 'Bids', href: '/bids', icon: '📋' });
-    } else if (currentRole === 'CONTRACTOR') {
-      baseItems.splice(2, 0, { name: 'Applications', href: '/applications', icon: '📝' });
-    }
+     if (currentRole === 'HOMEOWNER') {
+    baseItems.splice(2, 0, { name: 'Bids', href: '/bids', icon: faClipboardList });
+  } else if (currentRole === 'CONTRACTOR') {
+    baseItems.splice(2, 0, { name: 'Applications', href: '/applications', icon: faFileAlt });
+  }
 
     return baseItems;
   };
@@ -87,7 +96,7 @@ const Sidebar = () => {
                  onClick={() => dispatch(setSidebarOpen(false))}
                  className="group flex items-center px-3 py-2 text-sm font-medium text-gray-700 rounded-md hover:bg-primary-50 hover:text-primary-700 transition-all duration-200 cursor-pointer"
                >
-                 <span className="mr-3 text-lg">{item.icon}</span>
+                <FontAwesomeIcon icon={item.icon} className="mr-3 text-lg" />
                  {item.name}
                </Link>
              ))}
@@ -99,9 +108,7 @@ const Sidebar = () => {
               onClick={handleLogout}
               className="w-full flex items-center px-3 py-2 text-sm font-medium text-red-600 rounded-md hover:bg-red-50 hover:text-red-700 transition-all duration-200 cursor-pointer"
             >
-              <svg className="w-5 h-5 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
-              </svg>
+              <FontAwesomeIcon icon={faSignOutAlt} className="w-5 h-5 mr-3" />
               Sign Out
             </button>
           </div>

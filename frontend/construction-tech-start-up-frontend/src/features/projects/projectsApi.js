@@ -1,15 +1,7 @@
-import { createApi, fetchBaseQuery } from '@reduxjs/toolkit/query/react';
+import { createApi } from '@reduxjs/toolkit/query/react';
+import { baseQueryWithReauth } from '../../utils/baseQueryWithReauth';
 
-const baseQuery = fetchBaseQuery({
-  baseUrl: import.meta.env.VITE_API_URL || 'http://localhost:3000/api',
-  prepareHeaders: (headers, { getState }) => {
-    const token = getState().auth.token;
-    if (token) {
-      headers.set('authorization', `Bearer ${token}`);
-    }
-    return headers;
-  },
-});
+const baseQuery = baseQueryWithReauth();
 
 export const projectsApi = createApi({
   reducerPath: 'projectsApi',
@@ -29,7 +21,7 @@ export const projectsApi = createApi({
     }),
     createProject: builder.mutation({
       query: (projectData) => ({
-        url: '/projects',
+        url: '/projects/create',
         method: 'POST',
         body: projectData,
       }),

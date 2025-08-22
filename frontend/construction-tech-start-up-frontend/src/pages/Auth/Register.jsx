@@ -1,15 +1,13 @@
-import React, { useState } from 'react';
-import { useDispatch } from 'react-redux';
+import { useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { useRegisterMutation } from '../../features/auth/authApi';
-import { showNotification } from '../../features/ui/uiSlice';
-import { setCredentials } from '../../features/auth/authSlice';
+import { useNotify } from '../../hooks/UseNotify';
 
 const Register = () => {
-  const dispatch = useDispatch();
   const navigate = useNavigate();
   const [register, { isLoading }] = useRegisterMutation();
-  
+  const notify = useNotify();
+
   const [formData, setFormData] = useState({
     email: '',
     password: '',
@@ -22,36 +20,17 @@ const Register = () => {
   const [errors, setErrors] = useState({});
 
   const roleDescriptions = {
-    HOMEOWNER: {
-      title: 'Homeowner',
-      description: 'Perfect for property owners looking to manage construction projects, find contractors, and track progress.',
-      permissions: ['Post project requirements', 'Browse and hire contractors', 'Track project milestones', 'Manage payments']
-    },
-    CONTRACTOR: {
-      title: 'Contractor',
-      description: 'Ideal for construction professionals providing services to clients and managing multiple projects.',
-      permissions: ['Browse available projects', 'Submit proposals', 'Manage project timelines', 'Communicate with clients']
-    },
-    OTHER: {
-      title: 'Other Professional',
-      description: 'For architects, engineers, consultants, and other construction industry professionals.',
-      permissions: ['Offer specialized services', 'Collaborate on projects', 'Provide expert consultation', 'Network with industry professionals']
-    }
+    HOMEOWNER: { title: 'Homeowner', description: 'Perfect for property owners...', permissions: [] },
+    CONTRACTOR: { title: 'Contractor', description: 'Ideal for construction professionals...', permissions: [] },
+    OTHER: { title: 'Other Professional', description: 'For architects, engineers...', permissions: [] }
   };
 
   const handleInputChange = (e) => {
     const { name, value } = e.target;
-    setFormData(prev => ({
-      ...prev,
-      [name]: value
-    }));
-    
-    // Clear error when user starts typing
+    setFormData(prev => ({ ...prev, [name]: value }));
+
     if (errors[name]) {
-      setErrors(prev => ({
-        ...prev,
-        [name]: ''
-      }));
+      setErrors(prev => ({ ...prev, [name]: '' }));
     }
   };
 
@@ -61,77 +40,50 @@ const Register = () => {
       primaryRole: role,
       professionDescription: role !== 'OTHER' ? '' : prev.professionDescription
     }));
-    
+
     if (errors.primaryRole) {
-      setErrors(prev => ({
-        ...prev,
-        primaryRole: ''
-      }));
+      setErrors(prev => ({ ...prev, primaryRole: '' }));
     }
   };
 
   const validateForm = () => {
     const newErrors = {};
-    
     if (!formData.email) newErrors.email = 'Email is required';
     if (!formData.password) newErrors.password = 'Password is required';
-    if (!formData.firstName) newErrors.firstName = 'First name is required';
-    if (!formData.lastName) newErrors.lastName = 'Last name is required';
-    if (!formData.primaryRole) newErrors.primaryRole = 'Please select your primary role';
-    
-    if (formData.primaryRole === 'OTHER' && !formData.professionDescription) {
-      newErrors.professionDescription = 'Please describe your profession';
-    }
-    
     if (formData.password && formData.password.length < 8) {
       newErrors.password = 'Password must be at least 8 characters long';
     }
-
+    if (!formData.firstName) newErrors.firstName = 'First name is required';
+    if (!formData.lastName) newErrors.lastName = 'Last name is required';
+    if (!formData.primaryRole) newErrors.primaryRole = 'Please select your primary role';
+    if (formData.primaryRole === 'OTHER' && !formData.professionDescription) {
+      newErrors.professionDescription = 'Please describe your profession';
+    }
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
   };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    
     if (!validateForm()) return;
-    
+
     try {
-      const userData = {
-        ...formData,
-        roles: [formData.primaryRole]
-      };
-      
+      const userData = { ...formData, roles: [formData.primaryRole] };
       delete userData.primaryRole;
-      
-      const result = await register(userData).unwrap();
-      dispatch(setCredentials(result));
-      
-      dispatch(showNotification({ 
-        message: 'Registration successful! Welcome aboard!', 
-        type: 'success' 
-      }));
-      
-      // Navigate to role-specific onboarding
+
+      await register(userData).unwrap();
+
+      notify.success('Registration successful! Welcome aboard!');
+
       navigate(`/onboarding/${formData.primaryRole.toLowerCase()}`);
     } catch (error) {
-      dispatch(showNotification({ 
-        message: error.data?.message || 'Registration failed', 
-        type: 'error' 
-      }));
+      notify.error(error?.data?.message || 'Registration failed');
     }
   };
 
   return (
     <div className="min-h-screen bg-gray-50 flex flex-col justify-center py-12 sm:px-6 lg:px-8">
-      <div className="sm:mx-auto sm:w-full sm:max-w-md">
-        <div className="flex justify-center">
-          <img
-            className="h-12 w-auto"
-            src="/src/assets/logo.png"
-            alt="Construction Tech"
-          />
-        </div>
+<div className="sm:mx-auto sm:w-full sm:max-w-md">
         <h2 className="mt-6 text-center text-3xl font-extrabold text-gray-900">
           Create your account
         </h2>

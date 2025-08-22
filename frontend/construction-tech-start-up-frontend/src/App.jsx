@@ -46,7 +46,7 @@ function App() {
     return () => {
       window.fetch = origFetch;
     };
-  }, []);
+  }, []); // This effect should only run once
 
   if (!isOnline) return <NoInternet />;
   if (hasServerError) return <ServerDown />;

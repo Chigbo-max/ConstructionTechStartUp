@@ -11,7 +11,9 @@ import uiReducer from '../features/ui/uiSlice';
 const authPersistConfig = {
   key: 'auth',
   storage,
-  whitelist: ['user', 'token', 'isAuthenticated', 'currentRole']
+  whitelist: ['user', 'token', 'isAuthenticated', 'currentRole'],
+  // Add blacklist for sensitive or frequently changing state that shouldn't be persisted
+  blacklist: []
 };
 
 // Import APIs
@@ -20,6 +22,8 @@ import { projectsApi } from '../features/projects/projectsApi';
 import { jobsApi } from '../features/jobs/jobsApi';
 import { notificationsApi } from '../features/notifications/notificationsApi';
 import { milestonesApi } from '../features/milestones/milestonesApi';
+import { contractorsApi } from '../features/contractors/contractorsApi';
+import { bidsApi } from '../features/bids/bidsApi';
 
 export const store = configureStore({
   reducer: {
@@ -33,6 +37,8 @@ export const store = configureStore({
     [jobsApi.reducerPath]: jobsApi.reducer,
     [notificationsApi.reducerPath]: notificationsApi.reducer,
     [milestonesApi.reducerPath]: milestonesApi.reducer,
+    [contractorsApi.reducerPath]: contractorsApi.reducer,
+    [bidsApi.reducerPath]: bidsApi.reducer,
   },
   
   // Adding the api middleware enables caching, invalidation, polling,
@@ -48,7 +54,9 @@ export const store = configureStore({
       projectsApi.middleware,
       jobsApi.middleware,
       notificationsApi.middleware,
-      milestonesApi.middleware
+      milestonesApi.middleware,
+      contractorsApi.middleware,
+      bidsApi.middleware
     ),
 });
 

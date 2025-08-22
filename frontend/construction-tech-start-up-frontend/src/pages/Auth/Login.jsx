@@ -1,69 +1,57 @@
-import React, { useState } from 'react';
-import { useDispatch } from 'react-redux';
+import { useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { useLoginMutation } from '../../features/auth/authApi';
-import { showNotification } from '../../features/ui/uiSlice';
-import { setCredentials } from '../../features/auth/authSlice';
+import { useNotify } from '../../hooks/UseNotify';
 
 const Login = () => {
-  const dispatch = useDispatch();
   const navigate = useNavigate();
   const [login, { isLoading }] = useLoginMutation();
-  
+  const notify = useNotify();
+
   const [formData, setFormData] = useState({
     email: '',
     password: '',
   });
 
+  const [errors, setErrors] = useState({});
+
   const handleInputChange = (e) => {
     const { name, value } = e.target;
-    setFormData(prev => ({
-      ...prev,
-      [name]: value
-    }));
+    setFormData(prev => ({ ...prev, [name]: value }));
+
+    if (errors[name]) {
+      setErrors(prev => ({ ...prev, [name]: '' }));
+    }
+  };
+
+  const validateForm = () => {
+    const newErrors = {};
+    if (!formData.email) newErrors.email = 'Email is required';
+    if (!formData.password) newErrors.password = 'Password is required';
+    setErrors(newErrors);
+    return Object.keys(newErrors).length === 0;
   };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    
+    if (!validateForm()) return;
+
     try {
-      const result = await login(formData).unwrap();
-      dispatch(setCredentials(result));
-      dispatch(showNotification({ 
-        message: 'Login successful!', 
-        type: 'success' 
-      }));
+      await login(formData).unwrap();
+      notify.success('Login successful!');
+
       navigate('/dashboard');
     } catch (error) {
-      dispatch(showNotification({ 
-        message: error.data?.message || 'Login failed', 
-        type: 'error' 
-      }));
+      notify.error(error?.data?.message || 'Login failed');
     }
   };
 
   return (
     <div className="min-h-screen bg-gray-50 flex flex-col justify-center py-12 sm:px-6 lg:px-8">
-      <div className="sm:mx-auto sm:w-full sm:max-w-md">
-        <div className="flex justify-center">
-          <img
-            className="h-12 w-auto"
-            src="/src/assets/logo.png"
-            alt="Construction Tech"
-          />
-        </div>
+ <div className="sm:mx-auto sm:w-full sm:max-w-md">
         <h2 className="mt-6 text-center text-3xl font-extrabold text-gray-900">
           Sign in to your account
         </h2>
-        <p className="mt-2 text-center text-sm text-gray-600">
-          Or{' '}
-          <Link
-            to="/register"
-            className="font-medium text-primary-600 hover:text-primary-500"
-          >
-            create a new account
-          </Link>
-        </p>
       </div>
 
       <div className="mt-8 sm:mx-auto sm:w-full sm:max-w-md">
@@ -78,7 +66,6 @@ const Login = () => {
                   id="email"
                   name="email"
                   type="email"
-                  autoComplete="email"
                   required
                   value={formData.email}
                   onChange={handleInputChange}
@@ -97,7 +84,6 @@ const Login = () => {
                   id="password"
                   name="password"
                   type="password"
-                  autoComplete="current-password"
                   required
                   value={formData.password}
                   onChange={handleInputChange}

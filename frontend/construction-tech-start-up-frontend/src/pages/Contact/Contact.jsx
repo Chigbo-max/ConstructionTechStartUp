@@ -35,20 +35,20 @@ const Contact = () => {
           </motion.p>
         </div>
       </section>
+<div className="w-full px-6 py-12">
+  <div className="max-w-4xl mx-auto flex flex-col md:flex-row justify-center items-center gap-12">
+    <div className="flex-1 text-center">
+      <h2 className="text-2xl font-bold text-primary-500">Phone</h2>
+      <p className="text-lg">+234 700 000 0000</p>
+    </div>
 
-      <div className="w-full flex flex-col md:flex-row justify-center items-center gap-12 p-12">
-  {/* Phone */}
-  <div className="w-full md:w-1/3 text-center md:text-left">
-    <h2 className="text-2xl font-bold text-primary-500">Phone</h2>
-    <p className="text-lg">+234 700 000 0000</p>
-  </div>
-
-  {/* Email */}
-  <div className="w-full md:w-1/3 text-center md:text-left">
-    <h2 className="text-2xl font-bold text-primary-500">Email</h2>
-    <p className="text-lg">hello@houzzify.com</p>
+    <div className="flex-1 text-center">
+      <h2 className="text-2xl font-bold text-primary-500">Email</h2>
+      <p className="text-lg">hello@houzzify.com</p>
+    </div>
   </div>
 </div>
+
 
       <div className="w-full px-4 sm:px-6 lg:px-8 py-16 bg-gradient-to-br from-gray-50 to-amber-50">
         <div className="max-w-7xl mx-auto">

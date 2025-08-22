@@ -1,10 +1,13 @@
 import { createSlice } from '@reduxjs/toolkit';
 
+const token = localStorage.getItem('token');
+const user = JSON.parse(localStorage.getItem('user')); 
+
 const initialState = {
-  user: null,
-  token: null,
-  isAuthenticated: false,
-  currentRole: null,
+  user: user || null,
+  token: token || null,
+  isAuthenticated: !!token, 
+  currentRole: user?.roles?.[0] || null,
   loading: false,
   error: null,
 };
@@ -18,8 +21,11 @@ const authSlice = createSlice({
       state.user = user;
       state.token = token;
       state.isAuthenticated = true;
-      state.currentRole = user.roles[0];
+      state.currentRole = user?.roles?.[0] || null;
       state.error = null;
+
+      localStorage.setItem('token', token);
+      localStorage.setItem('user', JSON.stringify(user));
     },
     setCurrentRole: (state, action) => {
       state.currentRole = action.payload;
@@ -30,6 +36,8 @@ const authSlice = createSlice({
       state.isAuthenticated = false;
       state.currentRole = null;
       state.error = null;
+      localStorage.removeItem('token');
+      localStorage.removeItem('user');
     },
     setLoading: (state, action) => {
       state.loading = action.payload;
@@ -43,6 +51,7 @@ const authSlice = createSlice({
     },
     updateUser: (state, action) => {
       state.user = { ...state.user, ...action.payload };
+      localStorage.setItem('user', JSON.stringify(state.user)); 
     },
   },
 });
@@ -59,7 +68,6 @@ export const {
 
 export default authSlice.reducer;
 
-// Selectors
 export const selectCurrentUser = (state) => state.auth.user;
 export const selectIsAuthenticated = (state) => state.auth.isAuthenticated;
 export const selectCurrentRole = (state) => state.auth.currentRole;

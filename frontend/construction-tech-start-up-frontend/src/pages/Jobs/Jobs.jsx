@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import { useState } from 'react';
 import { useSelector, useDispatch } from 'react-redux';
 import { useGetJobsQuery, useCreateJobMutation } from '../../features/jobs/jobsApi';
 import { selectCurrentRole } from '../../features/auth/authSlice';
@@ -10,7 +10,14 @@ const Jobs = () => {
   const [filter, setFilter] = useState('all');
   const [searchTerm, setSearchTerm] = useState('');
   
-  const { data: jobs = [], isLoading, error } = useGetJobsQuery();
+  const { data: jobsData, isLoading, error } = useGetJobsQuery();
+  
+  // Ensure jobs is always an array
+  const jobs = Array.isArray(jobsData)
+    ? jobsData
+    : Array.isArray(jobsData?.jobs)
+    ? jobsData.jobs
+    : [];
   const [createJob, { isLoading: isCreating }] = useCreateJobMutation();
 
   const filteredJobs = jobs.filter(job => {

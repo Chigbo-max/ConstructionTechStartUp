@@ -1,15 +1,8 @@
-import { createApi, fetchBaseQuery } from '@reduxjs/toolkit/query/react';
+import { createApi } from '@reduxjs/toolkit/query/react';
+import { baseQueryWithReauth } from '../../utils/baseQueryWithReauth';
+import { setCredentials } from './authSlice';
 
-const baseQuery = fetchBaseQuery({
-  baseUrl: import.meta.env.VITE_API_URL || 'http://localhost:3000/api',
-  prepareHeaders: (headers, { getState }) => {
-    const token = getState().auth.token;
-    if (token) {
-      headers.set('authorization', `Bearer ${token}`);
-    }
-    return headers;
-  },
-});
+const baseQuery = baseQueryWithReauth();
 
 export const authApi = createApi({
   reducerPath: 'authApi',
@@ -31,6 +24,13 @@ export const authApi = createApi({
         body: credentials,
       }),
       invalidatesTags: ['Auth'],
+      async onQueryStarted(arg, { dispatch, queryFulfilled }) {
+        try {
+          const { data } = await queryFulfilled;
+          dispatch(setCredentials(data)); 
+        } catch (err) {
+        }
+      },
     }),
     switchRole: builder.mutation({
       query: (role) => ({

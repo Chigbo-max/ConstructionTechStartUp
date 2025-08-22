@@ -14,7 +14,7 @@ function Layout(){
             <main>
                 <Outlet/>
             </main>
-            {!isAuthenticated && <Footer/>}
+            {isAuthenticated && <Footer/>}
             {isAuthenticated && <Sidebar/>}
         </div>
     )

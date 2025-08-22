@@ -8,6 +8,7 @@ import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, Responsive
 import { FiHome, FiTool, FiClipboard, FiCheckCircle, FiClock, FiBell, FiPlus, FiSearch, FiEdit, FiTrendingUp, FiEye, FiBriefcase, FiPhoneCall, FiBook } from 'react-icons/fi';
 import { faNairaSign } from '@fortawesome/free-solid-svg-icons';
 import { useNavigate } from 'react-router-dom';
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 
 const Dashboard = () => {
   const currentUser = useSelector(selectCurrentUser);
@@ -37,14 +38,16 @@ const Dashboard = () => {
           { title: 'Active Projects', value: activeProjects.length, color: 'bg-primary-500', icon: <FiHome className="w-6 h-6" /> },
           { title: 'Completed Projects', value: completedProjects.length, color: 'bg-green-500', icon: <FiCheckCircle className="w-6 h-6" /> },
           { title: 'Pending Bids', value: pendingBids.length, color: 'bg-yellow-500', icon: <FiClock className="w-6 h-6" /> },
-          { title: 'Total Spent', value: '₦0', color: 'bg-blue-500', icon: <faNairaSign className="w-6 h-6" /> }
+          { title: 'Total Spent', value: '₦0', color: 'bg-blue-500', icon:<FontAwesomeIcon icon={faNairaSign} className="w-6 h-6" /> }
+
         ];
       case 'CONTRACTOR':
         return [
           { title: 'Active Jobs', value: activeProjects.length, color: 'bg-primary-500', icon: <FiTool className="w-6 h-6" /> },
           { title: 'Completed Jobs', value: completedProjects.length, color: 'bg-green-500', icon: <FiCheckCircle className="w-6 h-6" /> },
           { title: 'Pending Applications', value: pendingBids.length, color: 'bg-yellow-500', icon: <FiClipboard className="w-6 h-6" /> },
-          { title: 'Total Earnings', value: '₦0', color: 'bg-blue-500', icon: <faNairaSign className="w-6 h-6" /> }
+          { title: 'Total Earnings', value: '₦0', color: 'bg-blue-500', icon: <FontAwesomeIcon icon={faNairaSign} className="w-6 h-6" /> }
+
         ];
       default:
         return [
@@ -94,7 +97,7 @@ const Dashboard = () => {
         navigate('/jobs');
         break;
       case 'contactSupport':
-        window.location.href = 'mailto:support@constructiontech.com';
+        navigate('/contactUs')
         break;
       case 'learnMore':
         navigate('/about');
@@ -136,12 +139,14 @@ const Dashboard = () => {
   const COLORS = ['#0088FE', '#00C49F', '#FFBB28', '#FF8042'];
 
   useEffect(() => {
-    // Generate chart data based on projects
-    if (projects.length > 0) {
-      // Monthly project data
-      const monthlyData = [
-        { name: 'Jan', value: projects.filter(p => new Date(p.createdAt).getMonth() === 0).length },
-        { name: 'Feb', value: projects.filter(p => new Date(p.createdAt).getMonth() === 1).length },
+  if (projects.length > 0) {
+    const activeProjects = projects.filter(p => p.status === 'IN_PROGRESS');
+    const completedProjects = projects.filter(p => p.status === 'COMPLETED');
+    const pendingBids = projects.filter(p => p.status === 'PENDING_BIDS');
+
+    const monthlyData = [
+      { name: 'Jan', value: projects.filter(p => new Date(p.createdAt).getMonth() === 0).length },
+      { name: 'Feb', value: projects.filter(p => new Date(p.createdAt).getMonth() === 1).length },
         { name: 'Mar', value: projects.filter(p => new Date(p.createdAt).getMonth() === 2).length },
         { name: 'Apr', value: projects.filter(p => new Date(p.createdAt).getMonth() === 3).length },
         { name: 'May', value: projects.filter(p => new Date(p.createdAt).getMonth() === 4).length },
@@ -155,16 +160,15 @@ const Dashboard = () => {
       ];
       setChartData(monthlyData);
 
-      // Project status distribution
-      const statusData = [
-        { name: 'Active', value: activeProjects.length },
-        { name: 'Completed', value: completedProjects.length },
-        { name: 'Pending', value: pendingBids.length },
-        { name: 'Other', value: projects.length - (activeProjects.length + completedProjects.length + pendingBids.length) },
-      ];
-      setPieData(statusData);
-    }
-  }, [projects, activeProjects, completedProjects, pendingBids]);
+     const statusData = [
+      { name: 'Active', value: activeProjects.length },
+      { name: 'Completed', value: completedProjects.length },
+      { name: 'Pending', value: pendingBids.length },
+      { name: 'Other', value: projects.length - (activeProjects.length + completedProjects.length + pendingBids.length) },
+    ];
+    setPieData(statusData);
+  }
+}, [projects]);
 
   if (projectsLoading || jobsLoading || notificationsLoading) {
     return (
@@ -197,7 +201,7 @@ const Dashboard = () => {
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 -mt-8">
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
           {getRoleSpecificStats().map((stat, index) => (
-            <div key={index} className="bg-white rounded-lg shadow-md hover:shadow-xl p-6 transform hover:scale-102 transition-all duration-200 cursor-pointer border-t-4 border-t-transparent hover:border-t-4 hover:border-t-primary-500">
+            <div key={index} className="bg-white rounded-lg shadow-md hover:shadow-xl p-6 transform hover:scale-105 transition-all duration-200 cursor-pointer border-t-4 border-t-transparent hover:border-t-4 hover:border-t-primary-500">
               <div className="flex items-center">
                 <div className={`${stat.color} rounded-full p-3 text-white flex items-center justify-center`}>
                   {stat.icon}
@@ -364,7 +368,7 @@ const Dashboard = () => {
         </div>
 
         {/* Call to Action */}
-        <div className="bg-gradient-to-r from-primary-500 to-primary-600 rounded-lg shadow-xl p-8 mt-8 text-center text-white relative overflow-hidden">
+        <div className="bg-gradient-to-r from-primary-500 to-primary-600 rounded-lg shadow-xl p-8 mt-8 mb-8 text-center text-white relative overflow-hidden">
           <div className="absolute inset-0 bg-black opacity-10 z-0"></div>
           <div className="relative z-10">
             <h2 className="text-3xl font-bold mb-4">Ready to get started?</h2>
